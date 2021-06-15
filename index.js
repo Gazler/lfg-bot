@@ -102,8 +102,8 @@ const availableRoles = ["healer", "heal", "tank", "dps"];
 
 client.on('message', async message => {
 	if (message.content.indexOf("!lfg") === 0) {
-    console.log(message.content);
     let content = message.content;
+    content = content.replace("!lfg ", "");
     const date = chrono.parseDate(message.content);
     if (date) {
       const [{text}] = chrono.parse(message.content);
@@ -143,11 +143,11 @@ client.on('message', async message => {
 
     let dungeon = parts.find((x) => dungeons[x.toLowerCase()]);
     let heroic;
-    dungeon = dungeons[dungeon.toLowerCase()];
-    if (dungeon) {
+    dungeon = dungeons[dungeon || "".toLowerCase()];
+    if (dungeon && content.split(" ").filter((x) => x !== "").length < 3) {
       heroic = parts.find((x) => heroics.indexOf(x.toLowerCase()) > -1);
     } else {
-      dungeon = content.replace("!lfg ", "");
+      dungeon = content;
     }
     if (date) {
       const meridem = date.getHours() > 12 ? "PM" : "AM";
