@@ -1,4 +1,5 @@
 const Discord = require('discord.js');
+const chrono = require('chrono-node');
 const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
 
 client.once('ready', () => {
@@ -6,12 +7,13 @@ client.once('ready', () => {
 });
 
 const heroics = ["hc", "heroic"];
+
 const dungeons = {
   hr: "Hellfire Ramparts",
   ramparts: "Hellfire Ramparts",
   bf: "The Blood Furnace",
-  sh: "Shattered Halls",
   halls: "Shattered Halls",
+  shh: "Shattered Halls",
 
   sp: "Slave Pens",
   ub: "The Underbog",
@@ -21,11 +23,14 @@ const dungeons = {
   ac: "Auchenai Crypts",
   sh: "Sethekk Halls",
   sl: "Shadow Labyrinth",
+  slabs: "Shadow Labyrinth",
   labs: "Shadow Labyrinth",
 
   dh: "Escape from Durnholde",
   durn: "Escape from Durnholde",
   durnholde: "Escape From Durnholde",
+  oh: "Escape from Durnholde",
+  bm: "Black Morass",
 
   mech: "The Mechanar",
   bot: "The Botanica",
@@ -34,15 +39,38 @@ const dungeons = {
 };
 
 const messageTemplate = (contents, tank, healer, dps) => {
-  const [head] = contents.split("---");
+  const [head, signed] = contents.split("---");
+  const signedMembers = signed.split("\n");
+  const existingDPS = [];
+  signedMembers.forEach((member) => {
+    if (member.indexOf("*") > -1) {
+      const role = member.split(":")[0].toLowerCase();
+      const [_, id] = member.match(/<@!?(\d+)>/) || [];
+      if (id && role === "tank") {
+        tank = { presign: true, id };
+      }
+
+      if (id && role === "healer") {
+        healer = { presign: true, id };
+      }
+
+      if (id && role === "dps") {
+        existingDPS.push({ presign: true, id });
+      }
+    }
+  });
+
+  dps = existingDPS.concat(dps);
+
+
   return `
 ${head}---
 
-Tank: ${tank ? "<@" + tank.id + ">" : ""}
-Healer: ${healer ? "<@" + healer.id + ">" : ""}
-DPS: ${dps[0] ? "<@" + dps[0].id + ">" : ""}
-DPS: ${dps[1] ? "<@" + dps[1].id + ">" : ""}
-DPS: ${dps[2] ? "<@" + dps[2].id + ">" : ""}
+Tank: ${tank ? (tank.presign ? "*" : "") + "<@" + tank.id + ">" : ""}
+Healer: ${healer ? (healer.presign ? "*" : "") + "<@" + healer.id + ">" : ""}
+DPS: ${dps[0] ? (dps[0].presign ? "*" : "") + "<@" + dps[0].id + ">" : ""}
+DPS: ${dps[1] ? (dps[1].presign ? "*" : "") + "<@" + dps[1].id + ">" : ""}
+DPS: ${dps[2] ? (dps[2].presign ? "*" : "") + "<@" + dps[2].id + ">" : ""}
 `
 };
 
@@ -70,35 +98,72 @@ const replaceRoles = async (reaction) => {
   reaction.message.edit(messageTemplate(reaction.message.content, tank, healer, dps));
 }
 
+const availableRoles = ["healer", "heal", "tank", "dps"];
+
 client.on('message', async message => {
 	if (message.content.indexOf("!lfg") === 0) {
-		// send back "Pong." to the channel the message was sent in
+    console.log(message.content);
+    let content = message.content;
+    const date = chrono.parseDate(message.content);
+    if (date) {
+      const [{text}] = chrono.parse(message.content);
+      content = content.replace(text, "");
+    }
     const parts = message.content.split(" ");
-    const matcher = new RegExp(/\d{1,2}:\d{2}/g);
-    const time = parts.find((x) => x.match(matcher));
+
+    let roles = {
+      heal: null,
+      tank: null,
+      dps: []
+    };
+
+    for (let i = 0; i < parts.length; i++) {
+      let current = parts[i];
+      if (current.match(/<@!?\d+>/g)) {
+        content = content.replace(current, "");
+        let next = parts[i + 1];
+        content = content.replace(next, "");
+        const roleIndex = availableRoles.indexOf(next);
+        if (roleIndex > -1) {
+          let currentRole = availableRoles[roleIndex];
+          if (currentRole === "healer") {
+            currentRole = "heal";
+          }
+
+          if (currentRole === "dps") {
+            roles[currentRole].push(current);
+          } else {
+            roles[currentRole] = current;
+          }
+          i++;
+        }
+      }
+    }
+
+
     let dungeon = parts.find((x) => dungeons[x.toLowerCase()]);
     let heroic;
-    dungeon = dungeons[dungeon];
+    dungeon = dungeons[dungeon.toLowerCase()];
     if (dungeon) {
       heroic = parts.find((x) => heroics.indexOf(x.toLowerCase()) > -1);
     } else {
-      dungeon = message.content.replace("!lfg ", "").replace(` ${time}`, "");
+      dungeon = content.replace("!lfg ", "");
     }
-    if (time) {
+    if (date) {
+      const meridem = date.getHours() > 12 ? "PM" : "AM";
       const eventStr = `
 **${dungeon}${heroic ? " (HEROIC)" : ""}**
 
-**TIME: **${time}
+**TIME: **${date.toDateString() + " " + date.getHours().toString().padStart(2, "0") + ":" + date.getMinutes().toString().padStart(2, "0") + meridem}
 
 Creator: <@${message.author.id}>
-
 ---
 
-Tank:
-Healer:
-DPS:
-DPS:
-DPS:
+Tank: ${roles.tank ? "*" + roles.tank : ""}
+Healer: ${roles.heal ? "*" + roles.heal : ""}
+DPS: ${roles.dps[0] ? "*" + roles.dps[0] : ""}
+DPS: ${roles.dps[1] ? "*" + roles.dps[1] : ""}
+DPS: ${roles.dps[2] ? "*" + roles.dps[2] : ""}
     `;
 
       const event = await message.channel.send(eventStr);

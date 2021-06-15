@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "chrono-node": "^2.3.0",
     "discord.js": "^12.5.3"
   }
 }
