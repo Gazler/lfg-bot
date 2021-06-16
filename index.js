@@ -109,7 +109,7 @@ client.on('message', async message => {
       const [{text}] = chrono.parse(message.content, new Date(), { forwardDate: true});
       content = content.replace(text, "");
     }
-    const parts = message.content.split(" ");
+    const parts = message.content.split(" ").filter((x) => x !== "");
 
     let roles = {
       heal: null,
