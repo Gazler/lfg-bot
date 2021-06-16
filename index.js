@@ -100,9 +100,9 @@ const replaceRoles = async (reaction) => {
     }));
 
   const [tanks, healers, dpsers] = reactions.map((r) => r.users.cache.filter((u) => !u.bot));
-  const tank = tanks.array()[0];
-  const healer = healers.array()[0];
-  const dps = dpsers.array();
+  const tank = tanks && tanks.array()[0];
+  const healer = healers && healers.array()[0];
+  const dps = dpsers ? dpsers.array() : [];
 
   reaction.message.edit(messageTemplate(reaction.message.content, tank, healer, dps));
 }
