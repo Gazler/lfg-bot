@@ -6,6 +6,10 @@ client.once('ready', () => {
   console.log('Ready!');
 });
 
+const ownMessage = (message) => {
+  return message.author.id === client.user.id;
+};
+
 const heroics = ["hc", "heroic"];
 
 const dungeons = {
@@ -78,10 +82,15 @@ const replaceRoles = async (reaction) => {
   try {
     if (reaction.partial) {
       await reaction.fetch();
+      await reaction.message.fetch();
     }
-    await reaction.message.fetch();
   } catch (error) {
     console.error('Something went wrong when fetching the message: ', error);
+    return;
+  }
+
+  if (!ownMessage(reaction.message)) {
+    return;
   }
 
   const reactions = await Promise.all(reaction.message.reactions.cache
