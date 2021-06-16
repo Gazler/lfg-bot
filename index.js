@@ -3,7 +3,7 @@ const chrono = require('chrono-node');
 const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
 
 client.once('ready', () => {
-	console.log('Ready!');
+  console.log('Ready!');
 });
 
 const heroics = ["hc", "heroic"];
@@ -85,10 +85,10 @@ const replaceRoles = async (reaction) => {
   }
 
   const reactions = await Promise.all(reaction.message.reactions.cache
-                                      .map(async (reaction) => {
-                                        await reaction.users.fetch();
-                                        return reaction;
-                                      }));
+    .map(async (reaction) => {
+      await reaction.users.fetch();
+      return reaction;
+    }));
 
   const [tanks, healers, dpsers] = reactions.map((r) => r.users.cache.filter((u) => !u.bot));
   const tank = tanks.array()[0];
@@ -101,12 +101,12 @@ const replaceRoles = async (reaction) => {
 const availableRoles = ["healer", "heal", "tank", "dps"];
 
 client.on('message', async message => {
-	if (message.content.indexOf("!lfg") === 0) {
+  if (message.content.indexOf("!lfg") === 0) {
     let content = message.content;
     content = content.replace("!lfg ", "");
     const date = chrono.parseDate(message.content, new Date(), { forwardDate: true });
     if (date) {
-      const [{text}] = chrono.parse(message.content, new Date(), { forwardDate: true});
+      const [{ text }] = chrono.parse(message.content, new Date(), { forwardDate: true });
       content = content.replace(text, "");
     }
     const parts = message.content.split(" ").filter((x) => x !== "");
@@ -175,7 +175,7 @@ DPS: ${roles.dps[2] ? "*" + roles.dps[2] : ""}
         console.log(error);
       }
     }
-	}
+  }
 });
 
 client.on('messageReactionAdd', async (reaction, user) => {
