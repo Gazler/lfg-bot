@@ -104,9 +104,9 @@ client.on('message', async message => {
 	if (message.content.indexOf("!lfg") === 0) {
     let content = message.content;
     content = content.replace("!lfg ", "");
-    const date = chrono.parseDate(message.content);
+    const date = chrono.parseDate(message.content, new Date(), { forwardDate: true });
     if (date) {
-      const [{text}] = chrono.parse(message.content);
+      const [{text}] = chrono.parse(message.content, new Date(), { forwardDate: true});
       content = content.replace(text, "");
     }
     const parts = message.content.split(" ");
