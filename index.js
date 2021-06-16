@@ -143,7 +143,7 @@ client.on('message', async message => {
 
     let dungeon = parts.find((x) => dungeons[x.toLowerCase()]);
     let heroic;
-    dungeon = dungeons[dungeon || "".toLowerCase()];
+    dungeon = dungeons[(dungeon || "").toLowerCase()];
     if (dungeon && content.split(" ").filter((x) => x !== "").length < 3) {
       heroic = parts.find((x) => heroics.indexOf(x.toLowerCase()) > -1);
     } else {
