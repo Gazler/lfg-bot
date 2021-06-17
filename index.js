@@ -180,6 +180,7 @@ DPS: ${roles.dps[2] ? "*" + roles.dps[2] : ""}
         await event.react("854068302750154772");
         await event.react("854068302673739796");
         await event.react("854068302720401438");
+        await event.react("❌");
       } catch (error) {
         console.log(error);
       }
@@ -192,7 +193,25 @@ client.on('messageReactionAdd', async (reaction, user) => {
     return;
   }
 
-  replaceRoles(reaction);
+  try {
+    if (reaction.partial) {
+      await reaction.message.fetch();
+    }
+  } catch (error) {
+    console.error('Something went wrong when fetching the message: ', error);
+    return;
+  }
+
+  if (reaction._emoji.name === "❌") {
+    const lines = reaction.message.content.split("\n");
+    const creatorLine = lines.find((x) => x.indexOf("Creator:") === 0);
+    const [_, id] = creatorLine.match(/<@!?(\d+)>/) || [];
+    if (id === user.id) {
+      reaction.message.delete();
+    }
+  } else {
+    replaceRoles(reaction);
+  }
 });
 
 client.on('messageReactionRemove', async (reaction, user) => {
