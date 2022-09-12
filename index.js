@@ -39,7 +39,27 @@ const dungeons = {
   mech: "The Mechanar",
   bot: "The Botanica",
   arc: "The Arcatraz",
-  arca: "The Arcatraz"
+  arca: "The Arcatraz",
+
+  uk: "Utgarde Keep",
+  an: "Azjol Nerub",
+  ak: "Ahn'kahet: The Old Kingdom",
+  nexus: "The Nexus",
+  dk: "Drek'Tharon Keep",
+  dtk: "Drek'Tharon Keep",
+  vh: "Violet Hold",
+  gun: "Gundrak",
+  gd: "Gundrak",
+  hos: "Halls of Stone",
+  hol: "Halls of Lightning",
+  oculus: "The Oculus",
+  up: "Utgarde Pinnacle",
+  cos: "The Culling of Stratholme",
+  tc: "Trial of the Champion",
+  toc: "Trial of the Champion",
+  fos: "The Forge of Souls",
+  pos: "Pit of Saron",
+  hor: "Halls of Reflection"
 };
 
 const messageTemplate = (contents, tank, healer, dps) => {
